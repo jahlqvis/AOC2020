@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace Day1
 {
@@ -211,8 +212,13 @@ namespace Day1
 
         static void Main(string[] args)
         {
+            Stopwatch sw = new Stopwatch();
+            Console.WriteLine("Code of advent 2020 - Day 1");
+            sw.Start();
             var res = Find3(2020);
+            sw.Stop();
             Console.WriteLine(res[0] * res[1] * res[2]);
+            Console.WriteLine("Time elapsed for day1 part2 .NET 5 (ms): {0}", sw.Elapsed.TotalMilliseconds);
         }
 
         static int[] Find2(int result)
