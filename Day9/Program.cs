@@ -168,10 +168,12 @@ namespace Day9
         static void Main(string[] args)
         {
             Stopwatch sw = new Stopwatch();
+            sw.Start();
             Console.WriteLine("Code of advent 2020 - Day 9");
             decipher.getinputfromfile();
             var res = decipher.find_number();
             res = decipher.find_magic_number(res);
+            sw.Stop();
             Console.WriteLine(res);
             Console.WriteLine("Time elapsed for day9 part2 .NET 5 (ms): {0}", sw.Elapsed.TotalMilliseconds);
         }
