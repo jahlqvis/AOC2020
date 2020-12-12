@@ -64,78 +64,33 @@ namespace Day10
         {
             List<int> adapterList = new List<int>(list);
             
+
             adapterList.Sort();
+            LinkedList<int> adapterList2 = new LinkedList<int>(adapterList);
 
-            int diff0 = 0;
             int diff1 = 0;
-            int diff2 = 0;
             int diff3 = 0;
-            int previous = 0;
-            int combi = 0;
+            var n = adapterList2.First;
+            int i = adapterList2.Count;
 
-            int[] l = new int[3];
-            l[0] = 0;
-            l[1] = 0;
-            l[2] = 0;
-            foreach (var a in adapterList)
+            long res = 0;
+            do
             {
+                var prevprev = n?.Previous?.Previous?.Value;
+                var prev = n?.Previous?.Value;
+                var next = n?.Next?.Value;
 
-                switch(a-previous)
-                {
-                    case 0:
-                        diff0++;
-                        break;
-                    case 1:
-                        diff1++;
-                        
-                        break;
-                    case 2:
-                        diff2++;
-                        break;
-                    case 3:
-                        diff3++;
-                        break;
-                    default:
-                        throw new ArgumentException("Difference between two adapter larger than 3");
-                }
-                previous = a;
-                combi += shift(ref l, a);
+                if (prev + 1 == n.Value && next == n.Value + 1)
+                    diff1++;
 
-            }
-            diff3++;
+                if (prev + 1 == n.Value && next == n.Value + 1 && prevprev +2 == n.Value)
+                    diff1--;
 
-            return combi;
-
-            //return permutations(combi);
-
-            //return diff1 * diff3;
-
-
-        }
-
-        private static int shift(ref int[] list, int new_number)
-        {
-            int result = 0;
-
-            if (new_number == list[0] + 1 && new_number == list[1] + 2)
-                result = 1;
-
-            int length = list.Length;
-
-            for (int i = length-1; i > 0; i--)
-                list[i] = list[i - 1];
-            
-            list[0] = new_number;
-
-            return result;
-        }
-
-        public static long permutations(int input)
-        {
-            long res=1;
-            for (int i = input; i > 0; i--)
-                res *= i;
-            return res;
+                i--;
+                n = n?.Next;
+            } while(i>0);
+             
+            return (long)Math.Pow(2, diff1);
         }
 
         public static void getinputfromfile()
@@ -160,7 +115,7 @@ namespace Day10
             sw.Start();
             Console.WriteLine("Code of advent 2020 - Day 10");
             //adapterChecker.getinputfromfile();
-            var res = adapterChecker.search(adapterChecker.testadapters1);
+            var res = adapterChecker.search(adapterChecker.testadapters2);
             Console.WriteLine(res);
             Console.WriteLine("Time elapsed for day10 part2 .NET 5 (ms): {0}", sw.Elapsed.TotalMilliseconds);
         }
