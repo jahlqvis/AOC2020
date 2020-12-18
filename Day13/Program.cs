@@ -1,68 +1,130 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Day13
 {
-    static class busschedules
+    public static class busschedules
     {
-        static string[] testnote = new string[]
-        {
-            "939",
-            "7,13,x,x,59,x,31,19"
-        };
 
-        static string[] note = new string[]
+        public static string[] testinput = new string[]
+{
+            "3417",
+            "17,x,13,19"
+};
+
+        public static string[] input = new string[]
         {
             "1000677",
             "29,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,41,x,x,x,x,x,x,x,x,x,661,x,x,x,x,x,x,x,x,x,x,x,x,13,17,x,x,x,x,x,x,x,x,23,x,x,x,x,x,x,x,521,x,x,x,x,x,37,x,x,x,x,x,x,x,x,x,x,x,x,19"
         };
 
-        static int earliest;
-        static Dictionary<int, int> buslist = new Dictionary<int, int>();
-
-        public static void init(bool test = false)
+        static ulong earliest;
+        static Dictionary<ulong, ulong> busdict = new Dictionary<ulong, ulong>();
+        static List<ulong> busses;
+        
+        public static void init(string[] note)
         {
-            if (test)
-                note = testnote;
+            earliest = ulong.Parse(note[0]);
 
-            earliest = int.Parse(note[0]);
             string[] buses = note[1].Split(',');
-            int n;
+            ulong i, n;
+            int length = buses.Length;
+
+            busdict.Clear();
+            i = 0;
             foreach (var bus in buses)
-                if (bus != "x" && int.TryParse(bus, out n))
-                    buslist.Add(n, 0);
+            {
+                if (bus != "x" && ulong.TryParse(bus, out n))
+                {
+                    busdict.Add(n, i);
+                }
+                i++;
+            }
+
+            busses = busdict.Keys.ToList();
+    
+            
+        }
+
+        public static ulong getstep(List<ulong> buslist)
+        {
+            var r = 1ul;
+            foreach (var b in buslist)
+            {
+                r = r * b;
+            }
+            return r;
+        }
+
+        public static ulong startsearch()
+        {
+            // main loop
+            ulong time=0;
+
+            var stepbusses = new List<ulong>();
+
+            busses.Sort();
+            busses.Reverse();
+
+            var is_valid = false;
+
+            while(!is_valid)
+            {
+                is_valid = true;
+                var step = getstep(stepbusses);
+                time = time + step;
+                
+                foreach (var bus in busses)
+                {
+                    var bustime = time + busdict[bus];
+                    var mod = bustime % bus;
+                    if (mod == 0)
+                    {
+                        if(!stepbusses.Contains(bus))
+                        {
+                            stepbusses.Add(bus);
+                            Console.WriteLine($"Added bus {bus} offset {busdict[bus]}");
+
+                        }
+                    }
+                    else
+                    {
+                        is_valid = false;
+                        break;
+                    }
+                }
+                
+                if (is_valid)
+                    break;
+            }
+
+            return time;
         }
 
         static void calculatewaitingtimetosnearest()
         {
-            List<int> keys = new List<int>(buslist.Keys);
-            foreach (int key in keys)
+            List<ulong> keys = new List<ulong>(busdict.Keys);
+            foreach (ulong key in keys)
             {
-                int i= 0;
+                ulong i= 0;
                 while (key * i < earliest)
                     i++;
                 
 
-                buslist[key] = key * i - earliest;
-            }
-
-
-
-            foreach (var bus in buslist)
-            {
-                
+                busdict[key] = key * i - earliest;
             }
         }
 
-        public static int getnearestbustime()
+        public static ulong getnearestbustime()
         {
             calculatewaitingtimetosnearest();
 
-            int waitingtime = int.MaxValue;
-            int busid = 0;
+            ulong waitingtime = int.MaxValue;
+            ulong busid = 0;
 
-            foreach (var bus in buslist)
+            foreach (var bus in busdict)
             {
                 if (waitingtime > bus.Value)
                 {
@@ -86,11 +148,11 @@ namespace Day13
             Stopwatch sw = new Stopwatch();
             Console.WriteLine("Code of advent 2020 - Day 13");
             sw.Start();
-            busschedules.init(false);
-            int res = busschedules.getnearestbustime();
+            busschedules.init(busschedules.input);
+            var res = busschedules.startsearch();
             sw.Stop();
-            Console.WriteLine($"The ID of the earliest bus you can take multiplied by the number of minutes you'll need to wait is: {res}");
-            Console.WriteLine("Time elapsed for day 13 part1 .NET 5 (ms): {0}", sw.Elapsed.TotalMilliseconds);
+            Console.WriteLine($"Earliest time is {res}");
+            Console.WriteLine("Time elapsed for day 13 part2 .NET 5 (ms): {0}", sw.Elapsed.TotalMilliseconds);
         }
     }
 }
