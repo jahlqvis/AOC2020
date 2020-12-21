@@ -33,14 +33,51 @@ namespace Day14
             return new string(charArray);
         }
 
+        static string modifyValue(string mask, string value)
+        {
+            string valueString = Regex.Match(value, @"\d+").Value;
+            string valueBinary = Convert.ToString(Convert.ToInt64(valueString, 10), 2);
+
+            string reversedValueString = Reverse(valueBinary);
+            char[] reversedResultString = new char[36];
+
+            string reversedMaskString = Reverse(mask);
+
+            for (int j = 0; j < reversedMaskString.Length; j++)
+            {
+                int valueStringLength = reversedValueString.Length;
+                switch (reversedMaskString[j])
+                {
+                    case 'X':
+                        if (j < valueStringLength)
+                            reversedResultString[j] = reversedValueString[j];
+                        else
+                            reversedResultString[j] = '0';
+                        break;
+                    case '1':
+                        reversedResultString[j] = '1';
+                        break;
+                    case '0':
+                        reversedResultString[j] = '0';
+                        break;
+                    default:
+                        throw new ArgumentException("Something wong with mask string");
+                }
+            }
+
+            string resultString = Reverse(new string(reversedResultString)); // re-reverse
+
+            return resultString;
+
+        }
         public static long ParseProgram(string[] program)
         {
             bool reachedEnd = false;
             int i = 0;
             int lengthOfProgram = program.Length;
-            string reversedMaskString = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"; 
-            
-            while(!reachedEnd)
+            string maskString = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+
+            while (!reachedEnd)
             {
                 reachedEnd = true;
 
@@ -49,7 +86,7 @@ namespace Day14
                 // mask
                 if (substrs[0].Equals("mask"))
                 {
-                    reversedMaskString = Reverse(substrs[1]);
+                    maskString = substrs[1];
                 }
                 // memory location and value
                 else if (substrs[0].Contains("mem"))
@@ -57,37 +94,8 @@ namespace Day14
                     string memoryAddressString = Regex.Match(substrs[0], @"\d+").Value;
                     int memoryAddress = int.Parse(memoryAddressString);
 
-                    string valueString = Regex.Match(substrs[1], @"\d+").Value;
-                    string valueBinary = Convert.ToString(Convert.ToInt64(valueString, 10), 2);
-
-                    string reversedValueString = Reverse(valueBinary);
-                    char[] reversedResultString = new char[36];
-
-                    //string binaryString = Convert.ToInt64(valueString, 2).ToString();
-
-                    for(int j = 0; j < reversedMaskString.Length; j++)
-                    {
-                        int valueStringLength = reversedValueString.Length;
-                        switch(reversedMaskString[j])
-                        {
-                            case 'X':
-                                if (j < valueStringLength)
-                                    reversedResultString[j] = reversedValueString[j];
-                                else
-                                    reversedResultString[j] = '0';
-                                break;
-                            case '1':
-                                reversedResultString[j] = '1';
-                                break;
-                            case '0':
-                                reversedResultString[j] = '0';
-                                break;
-                            default:
-                                throw new ArgumentException("Something wong with mask string");
-                        }
-                    }
-
-                    string resultString = Reverse(new string(reversedResultString)); // re-reverse
+                    string resultString = modifyValue(maskString, substrs[1]);
+                    
                     long result = Convert.ToInt64(resultString, 2);
 
                     if (_memory.ContainsKey(memoryAddress))
@@ -113,8 +121,6 @@ namespace Day14
 
     }
 
-
-
     class Program
     {
         static void Main(string[] args)
@@ -126,7 +132,7 @@ namespace Day14
             var res = emulator.ParseProgram(emulator.input);
             sw.Stop();
             Console.WriteLine($"Sum is {res}");
-            Console.WriteLine("Time elapsed for day 14 part2 .NET Core 3 (ms): {0}", sw.Elapsed.TotalMilliseconds);
+            Console.WriteLine("Time elapsed for day 14 part2 .NET 5 (ms): {0}", sw.Elapsed.TotalMilliseconds);
         }
     }
 }
